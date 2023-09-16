@@ -1,0 +1,24 @@
+local module = {}
+
+function module:Create(player: Player, profile)
+	local leaderstats = Instance.new("Folder")
+	leaderstats.Name = "leaderstats"
+	leaderstats.Parent = player
+	
+	local StageValue = Instance.new("NumberValue")
+	StageValue.Name = "Stage"
+	StageValue.Value = profile.Data.Stage
+	StageValue.Parent = leaderstats
+	
+	local GemValue = Instance.new("NumberValue")
+	GemValue.Name = "Gems"
+	GemValue.Value = profile.Data.Gems
+	GemValue.Parent = leaderstats
+
+	local PrestigeValue = Instance.new("NumberValue")
+	PrestigeValue.Name = "Prestige"
+	PrestigeValue.Value = profile.Data.Prestige
+	PrestigeValue.Parent = leaderstats
+end
+
+return module
