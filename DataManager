@@ -1,0 +1,53 @@
+  local Players = game:GetService("Players")
+	local ServerScriptService = game:GetService("ServerScriptService")
+
+	local PlayerData = script.Parent
+	local Library = ServerScriptService.Library
+
+	local ProfileService = require(Library:WaitForChild("ProfileService"))
+	local DataTemplate = require(script:WaitForChild("DataTemplate"))
+	local Leaderstats = require(script:WaitForChild("Leaderstats"))
+
+	local dataKey = "Testing"
+	local profileStore = ProfileService.GetProfileStore(dataKey, DataTemplate).Mock
+
+	local DataManager = {}
+
+	DataManager.Profiles = {}
+
+	local function PlayerAdded(player: Player)
+		local profile = profileStore:LoadProfileAsync("Player_"..player.UserId)
+		if profile ~= nil then
+			profile:AddUserId(player.UserId)
+			profile:Reconcile() -- Add new value over others...
+			
+			profile:ListenToRelease(function()
+				DataManager.Profiles[player] = nil
+				player:Kick()
+			end)
+			if player:IsDescendantOf(Players) then
+				DataManager.Profiles[player] = profile
+				Leaderstats:Create(player, profile)
+			else
+				profile:Release()
+			end
+		else
+			player:Kick()
+		end
+	end
+
+	local function PlayerRemoving(player: Player)
+		local profile = DataManager.Profiles[player]
+		if profile ~= nil then
+			profile:Release()
+		end
+	end
+
+	for _, player in Players:GetPlayers() do
+		task.spawn(PlayerAdded, player)
+	end
+
+	Players.PlayerAdded:Connect(PlayerAdded)
+	Players.PlayerRemoving:Connect(PlayerRemoving)
+
+	return DataManager
